@@ -57,6 +57,8 @@ class FurniGenerator
 
     constructor()
     {
+        console.clear();
+        console.log('furnigenerator \u001b[33m-TONIC\u001b[0m\n')
         this.init();
     }
 
@@ -70,11 +72,13 @@ class FurniGenerator
 
         await this.directories('./swfs');
         await this.directories('./queries');
-        await this.fetchFurnidata('http://127.0.0.1:1000/api/gamedata/furnidata', true);
+        await this.fetchFurnidata(process.env.localFurnidata, true);
         await this.fetchFurnidata('https://habbo.com/gamedata/furnidata_json/1');
         await this.downloadSwfs();
 
         await this.generateQueries();
+
+        process.exit
     }
 
     private async directories(dir: string)
@@ -86,6 +90,7 @@ class FurniGenerator
 
     private async fetchFurnidata(url: string, local: boolean = false)
     {
+        console.log(`loading ${url}`)
         await new Promise<void>(async (resolve, reject) =>
         {
             try
@@ -190,6 +195,8 @@ class FurniGenerator
         this.downloadedWall.forEach(async (furniJson, index) => writeToStr(furniJson, index, 1));
 
         await writeFile("./queries/all.sql", allStr);
+
+        console.log('saved to /queries/all.sql')
     }
 }
 
