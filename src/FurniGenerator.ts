@@ -72,6 +72,7 @@ class FurniGenerator
 
         await this.directories('./swfs');
         await this.directories('./queries');
+        await this.directories('./icons');
         await this.fetchFurnidata(process.env.localFurnidata, true);
         await this.fetchFurnidata('https://habbo.com/gamedata/furnidata_json/1');
         await this.downloadSwfs();
@@ -122,6 +123,8 @@ class FurniGenerator
         await this.downloadFiles(localFloor, floor);
         await this.downloadFiles(localWall, wall, false);
 
+        await this.downloadIcons([].concat(localFloor,localWall), [].concat(wall,floor));
+
         console.log(`found ${this.downloadedFloor.length + this.downloadedWall.length} missing furnis!`)
     }
 
@@ -146,6 +149,28 @@ class FurniGenerator
         }));
 
         console.log(`downloaded ${floor ? this.downloadedFloor.length : this.downloadedWall.length} ${floor ? 'floor' : 'wall'} items! `)
+    }
+
+    private async downloadIcons(local: IFurni[], habbo: IFurni[])
+    {
+        let icons = 0;
+        await Promise.all(habbo.map(async (furniJson: IFurni) =>
+        {
+            let exists = local.find(val => val.classname === furniJson.classname);
+            if (exists) return;
+
+            let url = `https://images.habbo.com/dcr/hof_furni/${furniJson.revision}/${furniJson.classname.replace("*","_")}_icon.png`;
+            let res = await fetch(url);
+
+            icons++;
+
+            const blob = await res.blob();
+            const stream = blob.stream();
+            const filePath = join('./icons', `${furniJson.classname.replace("*","_")}_icon.png`);
+            await writeFile(filePath, stream);
+        }));
+
+        console.log(`downloaded ${icons} icons!`);
     }
 
     private async generateQueries()
