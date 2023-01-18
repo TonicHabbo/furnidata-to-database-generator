@@ -2,6 +2,7 @@ import { createWriteStream, existsSync } from "fs";
 import { mkdir, writeFile } from "fs/promises";
 import { join } from "path";
 import { pipeline } from "stream/promises";
+import { UpdateResult } from "typeorm";
 import { promisify } from "util";
 import { Database } from "./database/Database";
 import { FurnidataEntity } from "./database/FurnidataEntity";
@@ -133,7 +134,7 @@ class FurniGenerator
         console.log(`downloading ${floor ? 'floor' : 'wall'} items...`)
         await Promise.all(habbo.map(async (furniJson: IFurni) =>
         {
-            let exists = local.find(val => val.classname === furniJson.classname);
+            let exists = (local.find(val => val.classname === furniJson.classname));
             if (exists) return;
 
             let url = `https://images.habbo.com/dcr/hof_furni/${furniJson.revision}/${furniJson.classname.split('*')[0]}.swf`;
@@ -156,7 +157,7 @@ class FurniGenerator
         let icons = 0;
         await Promise.all(habbo.map(async (furniJson: IFurni) =>
         {
-            let exists = local.find(val => val.classname === furniJson.classname);
+            let exists = (local.find(val => val.classname === furniJson.classname));
             if (exists) return;
 
             let url = `https://images.habbo.com/dcr/hof_furni/${furniJson.revision}/${furniJson.classname.replace("*","_")}_icon.png`;
@@ -180,15 +181,19 @@ class FurniGenerator
 
         let allStr = "";
 
+        let offset = 0;
+
         const writeToStr = (furniJson: IFurni, index: number, type: number) =>
         {
             let values = [];
 
-            let lastItemId = Math.floor(+lastItemBase.id + +index + +1);
+            let lastItemId = Math.floor(+lastItemBase.id + +index + +1 + offset);
 
-            furniJson.id = Math.floor(+lastFurniData.id + +index + +1);
+            furniJson.id = Math.floor(+lastFurniData.id + +index + +1 + offset);
 
             furniJson.offerid = furniJson.id;
+
+            offset += 1;
 
             Object.keys(furniJson).forEach(key =>
             {
@@ -216,8 +221,8 @@ class FurniGenerator
             allStr += "\n"
         }
 
-        this.downloadedFloor.forEach(async (furniJson, index) => writeToStr(furniJson, index, 0));
-        this.downloadedWall.forEach(async (furniJson, index) => writeToStr(furniJson, index, 1));
+        await Promise.all(this.downloadedFloor.map(async (furniJson, index) => writeToStr(furniJson, index, 0)))
+        await Promise.all(this.downloadedWall.map(async (furniJson, index) => writeToStr(furniJson, index, 1)))
 
         await writeFile("./queries/all.sql", allStr);
 

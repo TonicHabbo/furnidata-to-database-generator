@@ -8,7 +8,7 @@ export class Database
     public async setup()
     {
         let manager = new DataSource({
-            type: 'mysql',
+            type: 'mariadb',
             host: process.env.db_host,
             port: parseInt(process.env.db_port),
             username: process.env.db_username,
