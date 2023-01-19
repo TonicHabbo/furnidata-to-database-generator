@@ -145,7 +145,7 @@ class FurniGenerator
 
             const blob = await res.blob();
             const stream = blob.stream();
-            const filePath = join('./swfs', furniJson.classname + ".swf");
+            const filePath = join('./swfs', furniJson.classname.split('*')[0] + ".swf");
             await writeFile(filePath, stream);
         }));
 
