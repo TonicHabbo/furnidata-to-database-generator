@@ -209,6 +209,8 @@ class FurniGenerator
                 values.push(val);
             });
 
+            furniJson['rare'] = 0
+            
             if (parseInt(process.env.furnidatas_table) == 1) allStr += "INSERT INTO `furnidatas` (" + Object.keys(furniJson).join(", ") + ", type) VALUES(" + values.join(", ") + ", " + type + ");\n";
 
             allStr += "INSERT INTO `items_base` (`id`, `sprite_id`, `public_name`, `item_name`, `type`, `width`, `length`, `stack_height`, `allow_stack`, `allow_sit`, `allow_lay`, `allow_walk`, `allow_gift`, `allow_trade`, `allow_recycle`, `allow_marketplace_sell`, `allow_inventory_stack`)";
